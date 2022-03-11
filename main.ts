@@ -14,7 +14,7 @@ function emitSignalAlternating (intervalInSeconds: number) {
     // 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83
     band = primeNumbers.shift()
     primeNumbers.push(band)
-    basic.showNumber(band)
+    basic.showNumber(band, 100)
 
     radio.setFrequencyBand(band)
     radio.sendString("Ich bin ein Baum!")
@@ -26,10 +26,14 @@ function emitSignal (intervalInSeconds: number) {
     radio.setTransmitPower(7)
     radio.setTransmitSerialNumber(true)
     radio.setFrequencyBand(0)
+    /*
     radio.sendString("I am the red 1! Tell number 6 to make more noise")
+    :/ 19 character limit. Message needs to be split and written note 
+    */
+    radio.sendString("I am the red 1!")
     basic.pause(intervalInSeconds * 1000)
 }
-// SECOND TREASURE
+// SECOND TREASURE - needs written hint: "Tell number 6 to make more noise"
 function activeBeaconMode () {
     radio.setGroup(6)
     radio.setTransmitPower(7)
@@ -38,28 +42,33 @@ function activeBeaconMode () {
 }
 input.onButtonPressed(Button.A, function () {
     mode = mode - 1
-    if (mode < 0) {
-        mode = 2
+    if (mode < 1) {
+        mode = 3
     }
     basic.showNumber(mode)
 })
 input.onButtonPressed(Button.B, function () {
-    mode = (mode + 1) % 3
+    mode = mode + 1
+    if (mode > 3) {
+        mode = 1
+    }
     basic.showNumber(mode)
 })
+
+basic.forever(function () {
+    if (mode == 1) {
+        emitSignal(3)
+    }
+    if (mode == 2) {
+        activeBeaconMode()
+    }
+    if (mode == 3) {
+        emitSignalAlternating(1)
+    }
+})
+
 let band = 0
 let mode = 0
 let primeNumbers: number[] = []
 let group = 0
 primeNumbers = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83]
-basic.forever(function () {
-    if (mode == 0) {
-        emitSignal(3)
-    }
-    if (mode == 1) {
-        activeBeaconMode()
-    }
-    if (mode == 2) {
-        emitSignalAlternating(1)
-    }
-})
